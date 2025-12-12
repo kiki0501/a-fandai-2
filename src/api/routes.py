@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Dict, Any
 
 from src.core import MODELS_CONFIG_FILE, TokenStatsManager, DISABLE_AUTH
+from src.core.constants import ADMIN_API_KEY
 from src.api.vertex_client import VertexAIClient
 from src.core.auth import api_key_manager
 from src.stream.processor import APIError, EmptyResponseError  # Import error exceptions
@@ -36,12 +37,25 @@ def extract_api_key_from_request(request: Request) -> str:
 
 
 def validate_admin_key(api_key: str) -> bool:
-    """验证管理员密钥"""
+    """验证管理员密钥
+    
+    支持两种方式验证管理员权限：
+    1. 通过 api_keys.txt 文件中配置的 admin_key
+    2. 通过环境变量 ADMIN_API_KEY 设置的管理员密钥
+    """
     if not api_key:
         return False
 
+    # 方式1: 检查是否是 api_keys.txt 中配置的 admin_key
     key_info = api_key_manager.get_key_info(api_key)
-    return key_info and key_info.get('name') == 'admin_key' and key_info.get('is_active')
+    if key_info and key_info.get('name') == 'admin_key' and key_info.get('is_active'):
+        return True
+    
+    # 方式2: 检查是否是环境变量设置的管理员密钥
+    if ADMIN_API_KEY and api_key == ADMIN_API_KEY:
+        return True
+    
+    return False
 
 
 class APIKeyMiddleware(BaseHTTPMiddleware):

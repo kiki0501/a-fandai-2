@@ -44,3 +44,9 @@ def _parse_bool_env(env_name: str, default: bool = False) -> bool:
 # 通过环境变量 DISABLE_AUTH 控制是否禁用认证
 # 设置为 "true", "1", "yes" 时禁用认证，允许无 API Key 访问
 DISABLE_AUTH = _parse_bool_env("DISABLE_AUTH", False)
+
+# 管理员API密钥
+# 通过环境变量 ADMIN_API_KEY 设置管理员密钥
+# 如果设置了此环境变量，该密钥将拥有管理员权限，可以访问 /admin/* 端点
+# 此密钥独立于 api_keys.txt 文件中的配置
+ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "").strip() or None
