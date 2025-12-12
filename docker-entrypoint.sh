@@ -71,4 +71,4 @@ fi
 
 # 启动主应用
 log_info "启动 Python 应用..."
-exec python -m src.main "$@"
+exec python main.py "$@"
