@@ -89,6 +89,21 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
             )
 
         # 验证API密钥
+        # 首先检查是否是环境变量设置的管理员密钥
+        if ADMIN_API_KEY and api_key == ADMIN_API_KEY:
+            # 环境变量管理员密钥，设置特殊的请求状态
+            request.state.api_key = api_key
+            request.state.key_info = {
+                "name": "admin_key",
+                "description": "环境变量管理员密钥",
+                "is_active": True,
+                "created_at": None,
+                "usage_count": 0,
+                "last_used": None
+            }
+            return await call_next(request)
+        
+        # 然后检查 api_keys.txt 中的密钥
         if not api_key_manager.validate_key(api_key):
             return JSONResponse(
                 status_code=401,
