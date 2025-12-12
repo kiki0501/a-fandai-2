@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  vertex-ai-proxy:
+    build: .
+    container_name: vertex-ai-proxy
+    ports:
+      - "7860:7860"  # API 端口
+      - "7861:7861"  # WebSocket 端口 (headful 模式)
+    volumes:
+      # 持久化配置文件
+      - ./config:/app/config
+      # 持久化浏览器数据（用于保存登录状态）
+      - browser_data:/app/config/browser_data
+    environment:
+      - PYTHONUNBUFFERED=1
+      # 浏览器自动化模式: headless 或 headful
+      - BROWSER_MODE=headless
+      # 虚拟显示器配置
+      - DISPLAY=:99
+    # 共享内存大小（Chromium 需要）
+    shm_size: '2gb'
+    # 安全配置（运行 Chromium 所需）
+    security_opt:
+      - seccomp:unconfined
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  browser_data:
+    driver: local

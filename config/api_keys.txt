@@ -1,0 +1,10 @@
+# API访问密钥配置文件
+# 格式: key_name:api_key:description
+# 每行一个密钥配置，以#开头的行为注释
+
+# 默认管理员密钥
+admin_key:sk-1:管理员完全访问权限
+
+# 示例客户端密钥
+client_user1:sk-2:用户1的访问密钥
+client_user2:sk-3:用户2的访问密钥
