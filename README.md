@@ -115,11 +115,14 @@ docker run -d -p 7860:7860 -p 7861:7861 -v ./config:/app/config vertex-ai-proxy
 | 变量名 | 说明 | 默认值 |
 |--------|------|--------|
 | `DISABLE_AUTH` | 禁用 API 密钥认证（设为 `true` 或 `1` 启用） | `false` |
-| `ADMIN_API_KEY` | 管理员 API 密钥，用于访问管理接口（如 `/admin/*`） | 无 |
+| `ADMIN_API_KEY` | 管理员 API 密钥，可用于所有 API 端点的认证 | 无 |
 
 **说明：**
 - `DISABLE_AUTH`：启用后，所有 API 请求无需提供 API 密钥即可访问
-- `ADMIN_API_KEY`：通过环境变量设置管理员密钥，与 `config/api_keys.txt` 中的 `admin_key` 具有相同权限
+- `ADMIN_API_KEY`：通过环境变量设置管理员密钥，可用于：
+  - 访问管理接口（如 `/admin/*`）
+  - 访问所有需要认证的 API 端点（如 `/v1/chat/completions`、`/v1/models` 等）
+  - 与 `config/api_keys.txt` 中的密钥具有相同权限
 
 ### config/config.json
 
