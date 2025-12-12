@@ -39,11 +39,31 @@ python main.py
 
 ### Docker 部署
 
-```bash
-# 使用 docker-compose（推荐）
-docker-compose up -d
+#### 使用预构建镜像（推荐）
 
-# 或直接使用 docker
+```bash
+# 从 GitHub Container Registry 拉取镜像
+docker pull ghcr.io/<your-username>/a-fandai-2:latest
+
+# 运行容器
+docker run -d \
+  --name a-fandai-2 \
+  -p 7860:7860 \
+  -p 7861:7861 \
+  -v ./config:/app/config \
+  -v ./data:/app/data \
+  ghcr.io/<your-username>/a-fandai-2:latest
+```
+
+#### 使用 docker-compose
+
+```bash
+docker-compose up -d
+```
+
+#### 本地构建
+
+```bash
 docker build -t vertex-ai-proxy .
 docker run -d -p 7860:7860 -p 7861:7861 -v ./config:/app/config vertex-ai-proxy
 ```
@@ -131,12 +151,41 @@ docker run -d -p 7860:7860 -p 7861:7861 -v ./config:/app/config vertex-ai-proxy
 
 示例：gemini-3-pro-image-preview-2k
 
+## CI/CD
+
+本项目使用 GitHub Actions 自动构建 Docker 镜像并推送到 GitHub Container Registry (GHCR)。
+
+### 触发条件
+
+- 推送到 `main` 或 `master` 分支
+- 创建版本标签（如 `v1.0.0`）
+- Pull Request 到 `main` 或 `master` 分支（仅构建，不推送）
+- 手动触发
+
+### 镜像标签
+
+| 触发事件 | 镜像标签示例 |
+|----------|--------------|
+| 推送到 main | `latest`, `main`, `sha-abc1234` |
+| 版本标签 v1.2.3 | `1.2.3`, `1.2`, `1`, `sha-abc1234` |
+| Pull Request | 仅构建测试，不推送 |
+
+### 支持的平台
+
+- `linux/amd64`
+- `linux/arm64`
+
 ## 项目结构
 
 ```
 ├── main.py                 # 入口
 ├── Dockerfile              # Docker 构建文件
 ├── docker-compose.yml      # Docker Compose 配置
+├── docker-entrypoint.sh    # Docker 入口脚本
+├── .dockerignore           # Docker 忽略文件
+├── .github/
+│   └── workflows/
+│       └── docker-publish.yml  # GitHub Actions 工作流
 ├── config/
 │   ├── config.json         # 主配置
 │   ├── models.json         # 模型配置
