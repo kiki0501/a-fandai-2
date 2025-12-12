@@ -11,7 +11,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Dict, Any
 
-from src.core import MODELS_CONFIG_FILE, TokenStatsManager
+from src.core import MODELS_CONFIG_FILE, TokenStatsManager, DISABLE_AUTH
 from src.api.vertex_client import VertexAIClient
 from src.core.auth import api_key_manager
 from src.stream.processor import APIError, EmptyResponseError  # Import error exceptions
@@ -56,6 +56,13 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
 
         # 检查是否是完全排除的路径
         if path in self.excluded_paths:
+            return await call_next(request)
+
+        # 如果禁用了认证，直接放行
+        if DISABLE_AUTH:
+            # 设置默认的请求状态，避免后续代码出错
+            request.state.api_key = "disabled"
+            request.state.key_info = {"name": "auth_disabled", "is_active": True}
             return await call_next(request)
 
         # 获取API密钥
